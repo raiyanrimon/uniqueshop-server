@@ -37,6 +37,7 @@ async function run() {
     const productCollection = client.db('productDB').collection('product')
     const brandCollection = client.db('productDB').collection('brand')
     const userCollection = client.db('productDB').collection('user')
+    const cartCollection = client.db('productDB').collection('cart')
 
     app.get('/brand', async(req, res)=>{
       const cursor = brandCollection.find()
@@ -76,6 +77,21 @@ async function run() {
     const result = await userCollection.insertOne(newUser)
     res.send(result)
   })
+
+  app.get('/cart', async(req, res)=>{
+    const cursor = cartCollection.find()
+    const result = await cursor.toArray()
+    res.send(result)
+  })
+
+  
+  app.post('/cart', async(req, res)=>{
+    const newCart = req.body
+    console.log(newCart);
+    const result = await cartCollection.insertOne(newCart)
+    res.send(result)
+  })
+  
 
   app.put('/product/:brand/:id', async(req, res)=>{
     const id = req.params.id
