@@ -36,9 +36,29 @@ async function run() {
 
     const productCollection = client.db('productDB').collection('product')
     const brandCollection = client.db('productDB').collection('brand')
+    const userCollection = client.db('productDB').collection('user')
 
     app.get('/brand', async(req, res)=>{
       const cursor = brandCollection.find()
+      const result = await cursor.toArray()
+      res.send(result)
+    })
+
+    app.get('/product/:brand', async(req, res)=>{
+    const brandName = req.params.brand
+    const products = await productCollection.find({brandName}).toArray()
+    res.send(products)
+    })
+    app.get('/product/:brand/:id', async(req, res)=>{
+      const id = req.params.id
+      console.log(id);
+      const query = {_id : new ObjectId(id)}
+      const result= await productCollection.findOne(query)
+      res.send(result) 
+    })
+
+    app.get('/product', async(req, res)=>{
+      const cursor = productCollection.find()
       const result = await cursor.toArray()
       res.send(result)
     })
@@ -48,6 +68,35 @@ async function run() {
       console.log(newProduct);
       const result = await productCollection.insertOne(newProduct)
       res.send(result)
+  })
+
+  app.post('/user', async(req, res)=>{
+    const newUser = req.body
+    console.log(newUser)
+    const result = await userCollection.insertOne(newUser)
+    res.send(result)
+  })
+
+  app.put('/product/:brand/:id', async(req, res)=>{
+    const id = req.params.id
+    const options = {upsert: true}
+    const updatedProduct = req.body
+    const product = {
+      $set:{
+        name: updatedProduct.name,
+        rating: updatedProduct.rating,
+        brandName: updatedProduct.brandName,
+        price: updatedProduct.price,
+        type: updatedProduct.type,
+        description: updatedProduct.description,
+        image: updatedProduct.image
+      }
+    }
+    
+      
+    const filter = { _id: new ObjectId(id)}
+    const result = await productCollection.updateOne(filter, product, options)
+    res.send(result)
   })
 
     
