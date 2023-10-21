@@ -18,7 +18,6 @@ app.listen(port, ()=>{
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.hif0lwq.mongodb.net/?retryWrites=true&w=majority`;
 
-console.log(uri);
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -32,7 +31,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const productCollection = client.db('productDB').collection('product')
     const brandCollection = client.db('productDB').collection('brand')
@@ -52,7 +51,6 @@ async function run() {
     })
     app.get('/product/:brand/:id', async(req, res)=>{
       const id = req.params.id
-      console.log(id);
       const query = {_id : new ObjectId(id)}
       const result= await productCollection.findOne(query)
       res.send(result) 
@@ -66,14 +64,12 @@ async function run() {
 
     app.post('/product', async(req, res)=>{
       const newProduct = req.body
-      console.log(newProduct);
       const result = await productCollection.insertOne(newProduct)
       res.send(result)
   })
 
   app.post('/user', async(req, res)=>{
     const newUser = req.body
-    console.log(newUser)
     const result = await userCollection.insertOne(newUser)
     res.send(result)
   })
@@ -83,11 +79,16 @@ async function run() {
     const result = await cursor.toArray()
     res.send(result)
   })
+  app.get('/cart/:id', async(req, res)=>{
+    const id = req.params.id
+    const query = {_id: new ObjectId(id)}
+    const result = await cartCollection.findOne(query)
+    res.send(result) 
+  })
 
   
   app.post('/cart', async(req, res)=>{
     const newCart = req.body
-    console.log(newCart);
     const result = await cartCollection.insertOne(newCart)
     res.send(result)
   })
@@ -115,9 +116,17 @@ async function run() {
     res.send(result)
   })
 
+  app.delete('/cart/:id', async(req,res)=>{
+    const id = req.params.id
+    const query = {_id: new ObjectId(id)}
+    const result = await cartCollection.deleteOne(query)
+    res.send(result)
+
+  })
+
     
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
